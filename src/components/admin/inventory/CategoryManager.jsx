@@ -8,6 +8,7 @@ const CategoryManager = () => {
   const { categories, addCategory, removeCategory, updateCategory } = usePOS();
   const [newCategory, setNewCategory] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
+  const [editName, setEditName] = useState('');
   const categoryFileInputRef = useRef(null);
 
   const handleAddCategory = () => {
@@ -30,7 +31,21 @@ const CategoryManager = () => {
 
   const openCategoryEdit = (category) => {
     setEditingCategory(category);
-    categoryFileInputRef.current?.click();
+    setEditName(category.name);
+    // categoryFileInputRef.current?.click(); // Only open file input when editing image
+  };
+
+  const handleEditSave = () => {
+    if (editName.trim() && editingCategory) {
+      updateCategory(editingCategory.id, { name: editName });
+      setEditingCategory(null);
+      setEditName('');
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditingCategory(null);
+    setEditName('');
   };
 
   return (
@@ -55,7 +70,19 @@ const CategoryManager = () => {
                   <ImagePlus className="w-5 h-5 text-amber-500" />
                 </div>
               )}
-              <span className="text-amber-100">{cat.name}</span>
+              {editingCategory && editingCategory.id === cat.id ? (
+                <>
+                  <Input
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    className="bg-black/10 border-amber-800/50 text-amber-100 w-32"
+                  />
+                  <Button size="sm" className="ml-2 bg-green-700 hover:bg-green-800" onClick={handleEditSave}>Save</Button>
+                  <Button size="sm" variant="outline" className="ml-1" onClick={handleEditCancel}>Cancel</Button>
+                </>
+              ) : (
+                <span className="text-amber-100">{cat.name}</span>
+              )}
             </div>
             <div className="flex items-center">
               <Button size="sm" variant="ghost" onClick={() => openCategoryEdit(cat)}>
