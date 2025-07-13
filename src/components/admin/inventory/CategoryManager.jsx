@@ -9,6 +9,7 @@ const CategoryManager = () => {
   const [newCategory, setNewCategory] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
   const [editName, setEditName] = useState('');
+  const [editImage, setEditImage] = useState(null);
   const categoryFileInputRef = useRef(null);
 
   const handleAddCategory = () => {
@@ -32,20 +33,33 @@ const CategoryManager = () => {
   const openCategoryEdit = (category) => {
     setEditingCategory(category);
     setEditName(category.name);
-    // categoryFileInputRef.current?.click(); // Only open file input when editing image
+    setEditImage(category.image || null);
+  };
+
+  const handleEditImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleEditSave = () => {
     if (editName.trim() && editingCategory) {
-      updateCategory(editingCategory.id, { name: editName });
+      updateCategory(editingCategory.id, { name: editName, image: editImage });
       setEditingCategory(null);
       setEditName('');
+      setEditImage(null);
     }
   };
 
   const handleEditCancel = () => {
     setEditingCategory(null);
     setEditName('');
+    setEditImage(null);
   };
 
   return (
@@ -75,8 +89,23 @@ const CategoryManager = () => {
                   <Input
                     value={editName}
                     onChange={e => setEditName(e.target.value)}
-                    className="bg-black/10 border-amber-800/50 text-amber-100 w-32"
+                    className="bg-black/10 border-amber-800/50 text-amber-100 w-32 mb-1"
                   />
+                  <div className="flex items-center gap-2 mb-1">
+                    {editImage ? (
+                      <img src={editImage} alt="Preview" className="w-10 h-10 rounded-md object-cover" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-md bg-amber-950/50 flex items-center justify-center">
+                        <ImagePlus className="w-5 h-5 text-amber-500" />
+                      </div>
+                    )}
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleEditImageChange}
+                      className="bg-black/10 border-amber-800/50 text-amber-100 w-32"
+                    />
+                  </div>
                   <Button size="sm" className="ml-2 bg-green-700 hover:bg-green-800" onClick={handleEditSave}>Save</Button>
                   <Button size="sm" variant="outline" className="ml-1" onClick={handleEditCancel}>Cancel</Button>
                 </>
